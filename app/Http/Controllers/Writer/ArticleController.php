@@ -29,12 +29,5 @@ class ArticleController extends Controller
         'data' => $article
     ], 201);
   
-
-        $article = $this->writerArticleManager->submitArticleForReview($validatedData, $request->user());
-
-        return response()->json([
-            'message' => 'Article submitted for review successfully',
-            'data'    => new ArticleResource($article)
-        ], 201);
-    }
+}
 }

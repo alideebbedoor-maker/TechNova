@@ -18,18 +18,21 @@ class AdminArticleManager
         $this->articleRepo = $articleRepo;
     }
 
-    public function approveAndPublishArticle($articleId, User $admin)
-    {
-        $article = $this->articleRepo->update($articleId, [
-            'status' => 'published',
-            'approved_by' => $admin->id,
-            'published_at' => now(),
-        ]);
+   public function approveAndPublishArticle($articleId, User $admin)
+{
+    $this->articleRepo->update($articleId, [
+        'status' => 'published',
+        'approved_by' => $admin->id,
+        'published_at' => now(),
+    ]);
 
-        // ✅ هنا الـ Contextual Binding سيعمل 100% ويحقن الـ DatabaseNotificationSender
-        $notification = new InAppArticleNotification($article);
-        $this->notifier->send($admin, $notification);
+    $article = $this->articleRepo->findById($articleId);
 
-        return $article;
-    }
+    $notification = new InAppArticleNotification($article);
+    $this->notifier->send($admin, $notification);
+
+    return $article;
+}
+
+
 }

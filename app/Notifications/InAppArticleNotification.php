@@ -12,11 +12,12 @@ class InAppArticleNotification extends Notification implements ShouldQueue
     use Queueable;
 
     public $tries = 3;
-    protected $articleId; 
+    protected $article; 
 
-    public function __construct($articleId)
+    public function __construct(Article $article)
     {
-        $this->articleId = $articleId;
+        // استقبل Model مباشرة
+        $this->article = $article;
     }
 
     public function via($notifiable): array
@@ -26,12 +27,10 @@ class InAppArticleNotification extends Notification implements ShouldQueue
 
     public function toArray($notifiable): array
     {
-        $article = Article::find($this->articleId);
-
         return [
-            'article_id'   => $article ? $article->id : null,
-            'title'        => $article ? $article->title : 'Article deleted',
-            'status'       => $article ? $article->status : 'N/A',
+            'article_id'   => $this->article->id,
+            'title'        => $this->article->title,
+            'status'       => $this->article->status,
             'triggered_at' => now()->toIso8601String(),
             'message'      => "Admin Alert: An article status has been updated.",
         ];

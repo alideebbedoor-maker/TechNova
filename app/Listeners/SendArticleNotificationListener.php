@@ -21,12 +21,14 @@ class SendArticleNotificationListener implements ShouldQueue
     public function handle(ArticleCreatedEvent $event): void
     {
         $sender = ($event->user->role === 'admin') 
-                  ? app(DatabaseNotificationSender::class) 
-                  : app(EmailNotificationSender::class);
+            ? app(DatabaseNotificationSender::class) 
+            : app(EmailNotificationSender::class);
 
         $notification = ($event->user->role === 'admin') 
-                        ? new InAppArticleNotification($event->article->id) 
-                        : new EmailArticleNotification($event->article->id);
+            ? new InAppArticleNotification($event->article)   
+            : new EmailArticleNotification($event->article);
+
+
 
         $sender->send($event->user, $notification->onQueue('high')); 
     }
