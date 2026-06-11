@@ -22,7 +22,8 @@ class LogApiRequests
     {
         $duration = self::$startTime 
             ? number_format((microtime(true) - self::$startTime) * 1000, 2)
-            : number_format((microtime(true) - LARAVEL_START) * 1000, 2);
+            : number_format((microtime(true) - ($_SERVER['LARAVEL_START'] ?? microtime(true))) * 1000, 2);
+
 
         $user = $request->user() ? "User ID: {$request->user()->id}" : 'Guest';
 

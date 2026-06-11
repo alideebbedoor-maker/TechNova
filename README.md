@@ -1,46 +1,61 @@
-TechNova NewsRoom
+# NewsRoom - Internal News Platform
 
-TechNova NewsRoom هو نظام داخلي لإدارة ونشر الأخبار داخل الشركة، مبني باستخدام Laravel، ويهدف لتوفير بيئة مرنة وقابلة للتوسع لإدارة المحتوى، مع أداء عالي وتنظيم واضح للكود.
+هذا المشروع هو منصة أخبار داخلية متكاملة لشركة **TechNova**، تهدف إلى إدارة المحتوى الإخباري للموظفين بفعالية. تم بناء النظام ليكون قابلاً للتوسع (Scalable) ومبنياً وفق أفضل الممارسات البرمجية في Laravel.
 
-Setup (تشغيل المشروع)
+## 🏗 البنية المعمارية (Architecture)
+تم اعتماد مبادئ **Clean Architecture** لضمان استقلالية الكود وقابليته للاختبار:
+- **Service Container:** ربط منطق العمل (Business Logic) بعيداً عن الـ Controllers لضمان مرونة استبدال مصادر البيانات.
+- **Polymorphic Relations:** هيكلة مرنة تدعم التعليقات، المرفقات، والوسوم (Tags) عبر علاقات متعددة الأطراف، مما يسهل إضافة أنواع محتوى جديدة مستقبلاً.
+- **Contextual Binding:** توجيه الإشعارات بذكاء (Database للـ Admin، و Email للـ Writers) بناءً على سياق المستخدم.
 
-- git clone repo
-- composer install
-- cp .env.example .env
-- php artisan key:generate
-- ضبط إعدادات قاعدة البيانات
-- php artisan migrate --seed
-- php artisan serve
+## 🚀 المميزات التقنية
+- **Caching & Performance:** استخدام Redis لتخزين الإحصائيات وتقليل الضغط على قاعدة البيانات في أوقات الذروة.
+- **Background Jobs:** إدارة المهام الثقيلة (مثل الإشعارات والتقارير الأسبوعية) عبر Queues و Horizon لضمان عدم تأثر سرعة استجابة النظام.
+- **API Versioning:** دعم إصدارين (V1, V2) لضمان توافق النظام مع تطبيقات الموبايل والويب دون التأثير على التوافقية العكسية.
+- **API Security:** تطبيق Middleware للحماية، Rate Limiting، وتسجيل الطلبات (Request Logging) بعد اكتمال التنفيذ.
 
-لتشغيل العمليات الخلفية:
+## 🗄 الـ Entities والعلاقات
+- **User:** نظام أدوار (Admin, Writer, Reader).
+- **Article:** وحدة المحتوى الأساسية (مرتبطة بكاتب).
+- **Comment, Attachment, Tag:** كيانات مرتبطة بمحتوى النظام عبر علاقات Polymorphic.
 
-- php artisan queue:work
-- php artisan horizon (اختياري)
+## ⚙️ خطوات التشغيل (Setup Steps)
 
-ما الذي يقدمه النظام
+## ⚙️ خطوات التشغيل (Setup Steps)
 
-- إنشاء وإدارة الأخبار من قبل الكتّاب
-- صلاحيات واضحة (Admin / Writer)
-- نظام إشعارات مختلف حسب نوع المستخدم
-- حماية API + تتبع الطلبات
-- أداء عالي باستخدام Cache
+1. **استنساخ المشروع:**
+   ```bash
+   git clone [https://github.com/alideebbedoor-maker/TechNova.git](https://github.com/alideebbedoor-maker/TechNova.git)
+   cd TechNova
+ضبط البيئة:
+نسخ ملف .env.example إلى .env.
 
-ماذا استخدمنا (Architecture & Tools)
+ضبط إعدادات DB_CONNECTION و REDIS_HOST.
 
-- Service Layer: لفصل الـ business logic عن Controllers
-- Repository Pattern: لعزل مصدر البيانات
-- Service Container: لحقن الاعتمادات (Dependency Injection)
-- Eloquent Relationships:
-  - One-to-One (User - Profile)
-  - One-to-Many (User - Articles)
-  - Polymorphic (Comments, Attachments)
-  - Many-to-Many (Tags)
-- Form Requests: للتحقق من البيانات + الصلاحيات
-- Middleware: للحماية و logging
-- Events & Listeners: لتنفيذ العمليات التلقائية
-- Queues : للعمليات الخلفية (مثل الإشعارات)
--  Caching: لتحسين الأداء وتقليل الضغط على قاعدة البيانات
+تجهيز قاعدة البيانات:
 
-الفكرة المعمارية
 
-النظام مبني بحيث أي تغيير مستقبلي (مثل تغيير قاعدة البيانات أو إضافة Features جديدة) لا يؤثر على باقي أجزاء النظام، وذلك بفضل فصل الطبقات واستخدام Design Patterns.
+php artisan migrate --seed
+تشغيل الخدمات:
+
+php artisan serve
+php artisan queue:work
+🧪 الاختبارات (Testing)
+يحتوي المشروع على تغطية اختبارية كاملة تشمل:
+
+Feature Tests: تغطي صلاحيات الوصول، عمليات الـ CRUD، والـ API Structure.
+
+Unit Tests: للتحقق من منطق الإشعارات، الـ Jobs، والـ Emails.
+
+النتيجة: تمر جميع الاختبارات (31 اختباراً) بنجاح لضمان استقرار النظام.
+
+💡 لماذا هذا التوجه؟
+القرار المعماري: اخترت فصل الـ Logic في الخدمات (Services) لتسهيل الصيانة والتحكم.
+
+الأداء: الاعتماد على Redis و Queues هو الحل الأمثل لمواجهة التحديات أثناء فترات الذروة (300 مستخدم في آن واحد).
+
+## 🧪 الاختبارات (Testing):
+
+"اعتمدت استراتيجية اختبار شاملة (Testing Strategy) تضمن استقرار النظام عند كل إضافة برمجية (Regression Testing)، مع التركيز على تغطية حالات الاستخدام الحقيقية للمستخدمين والسيناريوهات الأمنية."
+
+

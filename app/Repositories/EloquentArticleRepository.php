@@ -7,16 +7,16 @@ use App\Models\Article;
 class EloquentArticleRepository implements ArticleRepositoryInterface
 {
     public function getPublishedArticles()
-    {
-        return Article::where('status', 'published')
-            ->with([
-                'author.profile',      
-                'comments.user',        
-                'tags'                  
-            ])
-            ->latest('published_at') 
-            ->get();
-    }
+{
+    return Article::where('status', 'published')
+        ->with([
+            'author.profile',      
+            'comments.user',        
+            'tags'                  
+        ])
+        ->latest('published_at') 
+        ->paginate(10); 
+}
 
    
     public function findById($id)

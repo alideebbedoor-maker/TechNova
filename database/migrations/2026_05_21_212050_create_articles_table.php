@@ -19,8 +19,10 @@ return new class extends Migration
         $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
         
         $table->timestamp('published_at')->nullable()->index(); 
-        
+    
         $table->timestamps();
+        $table->softDeletes();
+
     });
 }
 

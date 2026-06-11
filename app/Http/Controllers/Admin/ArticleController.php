@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateArticleStatusRequest;
 use App\Http\Resources\ArticleResource;
-use App\Services\AdminArticleManager; 
+use App\Services\AdminArticleManager;
 use App\Repositories\ArticleRepositoryInterface;
+use App\Models\Article;
 use Illuminate\Http\JsonResponse;
+use App\Jobs\SendArticlePublishedEmailJob; 
+
 
 class ArticleController extends Controller
 {
@@ -22,7 +25,7 @@ class ArticleController extends Controller
 
     public function index(): JsonResponse
     {
-        $articles = $this->articleRepository->getPublishedArticles(); 
+      $articles = Article::all();
 
         return response()->json([
             'message' => 'Articles retrieved successfully for admin review',
@@ -30,13 +33,38 @@ class ArticleController extends Controller
         ], 200);
     }
 
-    public function changeStatus(UpdateArticleStatusRequest $request, int $id): JsonResponse
+    public function changeStatus(UpdateArticleStatusRequest $request, $id): JsonResponse
     {
-        $article = $this->adminArticleManager->approveAndPublishArticle($id, $request->user());
+        $article = Article::findOrFail($id);
+        
+        $oldStatus = $article->status;
+        
+        $validated = $request->validated();
+
+        $article->update([
+            'status' => $validated['status']
+        ]);
+
+        if ($validated['status'] === 'published' && $oldStatus !== 'published') {
+            SendArticlePublishedEmailJob::dispatch($article);
+        }
+
+            return response()->json([
+            'message' => 'Article status updated successfully',
+            'data' => [
+             'id' => $article->id,
+            'status' => $article->status
+                    ]
+            ], 200);   
+        }
+
+    public function destroy($id)
+    {
+        $article = Article::findOrFail($id);
+        $article->delete();
 
         return response()->json([
-            'message' => 'Article status updated successfully by Admin',
-            'data'    => new ArticleResource($article)
+            'message' => 'Article deleted successfully'
         ], 200);
     }
 }
